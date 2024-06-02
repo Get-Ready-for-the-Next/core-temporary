@@ -17,11 +17,13 @@ export class UserRepository extends Repository<User> {
     email: string,
     hashedPassword: string,
     nickname: string,
+    picture: string | null,
   ): Promise<User> {
     return await this.save({
       email: email,
       password: hashedPassword,
       nickname: nickname,
+      picture: picture,
     });
   }
 
@@ -60,6 +62,21 @@ export class UserRepository extends Repository<User> {
     const queryBuilder = this.createQueryBuilder('user').where(
       'user.id = :userId',
       { userId },
+    );
+
+    const user = await queryBuilder.getOne();
+
+    if (!user) {
+      throw new NotFoundException('User not found.');
+    }
+
+    return user;
+  }
+
+  async findUserByEmail(email: string): Promise<User> {
+    const queryBuilder = this.createQueryBuilder('user').where(
+      'user.email = :userEmail',
+      { userEmail: email },
     );
 
     const user = await queryBuilder.getOne();
